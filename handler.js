@@ -23,7 +23,7 @@ resolve()
  * Handle messages upsert
  * @param {import('@adiwajshing/baileys').BaileysEventMap<unknown>['messages.upsert']} groupsUpdate 
  */
-export async function handler(chatUpdate) {
+exporEsta función solo puede ser usada por mi desarrolladort async function handler(chatUpdate) {
 this.msgqueque = this.msgqueque || [];
 this.uptime = this.uptime || Date.now();
 if (!chatUpdate) {
@@ -707,7 +707,7 @@ if (!isAnticall) return
 for (let nk of callUpdate) { 
 if (nk.isGroup == false) {
 if (nk.status == "offer") {
-let callmsg = await this.reply(nk.from, `❮📣❯ 𝗛𝗼𝗹𝗮 *@${nk.from.split('@')[0]}*, 𝙡𝙖𝙨 ${nk.isVideo ? '𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀' : '𝘃𝗶𝗱𝗲𝗼 𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀'} 𝗻𝗼 𝗲𝘀𝘁𝗮𝗻 𝗽𝗲𝗿𝗺𝗶𝘁𝗶𝗱𝗮𝘀 𝗲𝗻 𝗲𝘀𝘁𝗲 𝗯𝗼𝘁.\n\n• 𝗘𝗻 𝗰𝗮𝘀𝗼 𝗱𝗲 𝘂𝗻 𝗲𝗿𝗿𝗼𝗿, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁𝗮 𝗮𝗹 𝗽𝗿𝗼𝗽𝗶𝗲𝘁𝗮𝗿𝗶𝗼:\n• ${creador}`, false, { mentions: [nk.from] })
+let callmsg = await this.reply(nk.from, `❮📣❯ 𝗛𝗼𝗹𝗮 *@${nk.from.split('@')[0]}*, 𝙡𝙖𝙨 ${nk.isVideo ? '𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀' : '𝘃𝗶𝗱𝗲𝗼 𝗹??𝗮𝗺𝗮𝗱𝗮𝘀'} 𝗻𝗼 𝗲𝘀𝘁𝗮𝗻 𝗽𝗲𝗿𝗺𝗶𝘁𝗶𝗱𝗮𝘀 𝗲𝗻 𝗲𝘀𝘁𝗲 𝗯𝗼𝘁.\n\n• 𝗘𝗻 𝗰𝗮𝘀𝗼 𝗱𝗲 𝘂𝗻 𝗲𝗿𝗿𝗼𝗿, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁𝗮 𝗮𝗹 𝗽𝗿𝗼𝗽𝗶𝗲𝘁𝗮𝗿𝗶𝗼:\n• ${creador}`, false, { mentions: [nk.from] })
 //let data = global.owner.filter(([id, isCreator]) => id && isCreator)
 //await this.sendContact(nk.from, data.map(([id, name]) => [id, name]), false, { quoted: callmsg })
 await this.updateBlockStatus(nk.from, 'block')
@@ -737,16 +737,16 @@ console.error(e)
 
 global.dfail = (type, m, conn) => {
 const msg = {
-rowner: '「👑」 *Esta función solo puede ser usada por mi creador*\n\n> David-Chian.', 
-owner: '「👑」 *Esta función solo puede ser usada por mi desarrollador.', 
-mods: '「🤴🏻」 *Esta función solo puede ser usada por mis desarrolladores.*', 
-premium: '「🍧」 *Esta función solo es para usuarios Premium.', 
-group: '「🐢」 *Esta funcion solo puede ser ejecutada en grupos.*', 
-private: '「🍭」 *Esta función solo puede ser usada en chat privado.*', 
-admin: '「👑」 *Este comando solo puede ser usado por admins.*', 
-botAdmin: '「🚩」 *Para usar esta función debo ser admin.*', 
-unreg: '「🍟」 *¡Hey! no estas registrado, registrese para usar esta función*\n\n*/reg nombre.edad*\n\n*_❕ Ejemplo_* : */reg David.23*',
-restrict: '「💫」 *Esta característica esta desactivada.*'
+rowner: '「👑」 *لا يمكن استخدام هذه الميزة إلا بواسطة منشئ المحتوى الخاص بي*\n\n> ALI-Maoie.', 
+owner: '「👑」 *لا يمكن استخدام هذه الوظيفة إلا بواسطة المطور الخاص بي.', 
+mods: '「🤴🏻」 *لا يمكن استخدام هذه الميزة إلا من قبل المطورين لدي.*', 
+premium: '「🍧」 *هذه الميزة مخصصة فقط لمستخدمي Premium.', 
+group: '「🐢」 *لا يمكن تنفيذ هذه الوظيفة إلا في مجموعات.*', 
+private: '「🍭」 *لا يمكن استخدام هذه الوظيفة إلا في الدردشة الخاصة.*', 
+admin: '「👑」 *لا يمكن استخدام هذا الأمر إلا من قبل المسؤولين.*', 
+botAdmin: '「🚩」 *لاستخدام هذه الميزة يجب أن أكون مشرفتا.*', 
+unreg: '「🍟」 *¡يا! أنت غير مسجل، قم بالتسجيل لاستخدام هذه الوظيفة*\n\n*/سجل الاسم.العمر*\n\n*_❕ مثلا_* : */.سجل ali.24*',
+restrict: '「💫」 *تم تعطيل هذه الميزة.*'
 }[type];
 if (msg) return conn.reply(m.chat, msg, m, rcanal).then(_ => m.react('✖️'))}
 const file = global.__filename(import.meta.url, true);
