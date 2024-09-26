@@ -23,7 +23,7 @@ font: 'chrome',
 align: 'center',
 colors: ['red']
 });
-say(`Developed By • ALI-Maoie`, {
+say(`Developed By • David-Chian`, {
 font: 'console',
 align: 'center',
 colors: ['yellow']
