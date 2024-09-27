@@ -63,13 +63,13 @@ global.waittt = '🕒 *𝗘𝘀𝗽𝗲𝗿𝗮 𝗨𝗻 𝗠𝗼𝗺𝗲𝗻�
 global.waitttt = '🕒 *𝗘𝘀𝗽𝗲𝗿𝗮 𝗨𝗻 𝗠𝗼𝗺𝗲𝗻𝘁𝗼, 𝗦𝗼𝘆 𝗟𝗲𝗻𝘁𝗮 ...*';
 
 //Enlaces
-var grupo = 'https://chat.whatsapp.com/H5bw4MJucS1BBHnZ9wv3vI'
-var canal = 'https://whatsapp.com/channel/0029VacDy0R6hENqnTKnG820'  
-var canal2 = 'https://whatsapp.com/channel/0029Vam7yUg77qVaz3sIAp0z'
-var git = 'https://github.com/David-Chian' 
-var youtube = 'https://youtube.com/@davidchian4957' 
-var github = 'https://github.com/David-Chian/Megumin-Bot-MD' 
-let correo = 'noisebot40@gmail.com'
+var grupo = 'https://chat.whatsapp.com/I7sLaRBY4nIAzbnHK8hVPK'
+var canal = 'https://whatsapp.com/channel/0029ValqtZALtOj5BbMDRV0u'  
+var canal2 = ''
+var git = 'https://github.com/migumin-ai' 
+var youtube = 'https://youtube.com/@newsportintern2831?si=cGckNm-XQ13Poics' 
+var github = 'https://github.com/migumin-ai/Megumin' 
+let correo = 'abdelalibloug@gmail.com'
 
 global.redes = [canal, canal2, grupo, git, youtube, github, correo].getRandom()
 
@@ -102,7 +102,7 @@ global.fake = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo
 }}, { quoted: m }
 
 global.icono = [ 
-'https://telegra.ph/file/1b1e9dc1f68fba7104afe.jpg',
+'https://telegra.ph/file/bb44e64a5fa8ad458bf19.jpg',
 'https://telegra.ph/file/a60f80a476fffc5ce4db9.jpg',
 'https://telegra.ph/file/bb44e64a5fa8ad458bf19.jpg',
 'https://telegra.ph/file/6c262b841689f9e9837d4.jpg',
