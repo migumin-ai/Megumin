@@ -41,7 +41,7 @@ await conn.sendMessage(m.chat, { text: texto1, contextInfo: { externalAdReply: {
     thumbnail: global.logo7
   }}} , { quoted: m })
 
-if (command == 'play5') {        
+if (command == 'play5', 'شغل') {        
 try {
 let q = '128kbps'
 let v = yt_play[0].url
@@ -125,9 +125,9 @@ m.react(error)
 return conn.reply(m.chat, '⚠️ Error ⚠️ *intentelo de nuevo*', m, rcanal, )}
 
 }
-handler.help = ['play5', 'play6']
+handler.help = ['play5', 'play6','شـغـل']
 handler.tags = ['descargas']
-handler.command = /^play5|play6$/i
+handler.command = /^play5|play6|شغل$/i
 
 handler.register = true
 handler.limit = true
