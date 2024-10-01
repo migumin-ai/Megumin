@@ -1,43 +1,56 @@
 const handler = async (m, { conn, text, command, usedPrefix }) => {
-// if (m.mentionedJid.includes(conn.user.jid)) return; // Evitar advertir al bot mismo
-const pp = 'https://i.imgur.com/vWnsjh8.jpg'
-let number, ownerNumber, aa, who;
-if (m.isGroup) { 
-who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text; 
-} else who = m.chat;
-  const user = global.db.data.users[who];
-  const usuario = conn.user.jid.split`@`[0] + '@s.whatsapp.net'
-  const bot = global.db.data.settings[conn.user.jid] || {};
-  const dReason = 'Sin motivo';
-  const msgtext = text || dReason 
-  const sdms = msgtext.replace(/@\d+-?\d* /g, '');
-  const warntext = `*❌ Etiquete a una persona o responda a un mensaje del grupo para advertir al usuario*\n\n*Ejemplo:*\n*${usedPrefix + command} @tag*`;
-  if (!who) {
-return m.reply(warntext, m.chat, { mentions: conn.parseMention(warntext) });
-  }
+    const pp = 'https://i.imgur.com/vWnsjh8.jpg';
+    let who;
 
-for (let i = 0; i < global.owner.length; i++) {
-ownerNumber = global.owner[i][0];
-if (usuario.replace(/@s\.whatsapp\.net$/, '') === ownerNumber) {
-aa = ownerNumber + '@s.whatsapp.net'
-await conn.reply(m.chat, `…`, m, { mentions: [aa] })
-return
-}}
+    // تحقق من الشخص المستهدف سواء كان مذكورًا أو تم الرد على رسالته
+    if (m.isGroup) { 
+        who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text; 
+    } else {
+        who = m.chat;
+    }
 
-  user.warn += 1;
-  await m.reply(`${user.warn == 1 ? `*@${who.split`@`[0]}*` : `*@${who.split`@`[0]}*`} 𝚁𝙴𝙲𝙸𝙱𝙸𝙾 𝚄𝙽𝙰 𝙰𝙳𝚅𝙴𝚁𝚃𝙴𝙽𝙲𝙸𝙰 𝙴𝙽 𝙴𝚂𝚃𝙴 𝙶𝚁𝚄𝙿𝙾!\nMotivo: ${sdms}\n*Advertencias: ${user.warn}/4*`, null, { mentions: [who] },
-  );
-  if (user.warn >= 4) {
-    user.warn = 0;
-    await m.reply(`𝚃𝙴 𝙻𝙾 𝙰𝙳𝚅𝙴𝚁𝚃𝙸 𝚅𝙰𝚁𝙸𝙰𝚂 𝚅𝙴𝙲𝙴𝚂!!\n*@${who.split`@`[0]}* 𝚂𝚄𝙿𝙴𝚁𝙰𝚂𝚃𝙴 𝙻𝙰𝚂 *4* 𝙰𝙳𝚅𝙴𝚁𝚃𝙴𝙽𝙲𝙸𝙰𝚂, 𝙰𝙷𝙾𝚁𝙰 𝚂𝙴𝚁𝙰𝚂 𝙴𝙻𝙸𝙼𝙸𝙽𝙰𝙳𝙾/𝙰 👽`, null, { mentions: [who] },
+    // إذا لم يكن هناك شخص محدد، اعرض رسالة تنبيه
+    if (!who) {
+        const warntext = `❌ يرجى الإشارة إلى شخص أو الرد على رسالة لتحذير المستخدم\n\nمثال:\n${usedPrefix + command} @tag`;
+        return m.reply(warntext, m.chat, { mentions: conn.parseMention(warntext) });
+    }
+
+    const user = global.db.data.users[who];
+    if (!user) {
+        return m.reply("❌ المستخدم غير مسجل في قاعدة البيانات.", m.chat);
+    }
+
+    const dReason = 'لا يوجد سبب'; // السبب الافتراضي
+    const msgtext = text || dReason; // استخدم النص أو السبب الافتراضي
+    const sdms = msgtext.replace(/@\d+-?\d* /g, ''); // إزالة أي منشن من السبب
+
+    // زيادة عدد التحذيرات
+    user.warn += 1;
+
+    // إرسال رسالة تحذير
+    await m.reply(
+        `*@${who.split`@`[0]}* لقد تلقيت إنذارًا!\nالسبب: ${sdms}\nالتحذيرات: ${user.warn}/4`, 
+        null, 
+        { mentions: [who] }
     );
-    await conn.groupParticipantsUpdate(m.chat, [who], 'remove');
-  }
-  return !1;
+
+    // إذا تجاوز المستخدم 4 تحذيرات، سيتم طرده
+    if (user.warn >= 4) {
+        user.warn = 0; // إعادة ضبط التحذيرات
+        await m.reply(
+            `*@${who.split`@`[0]}* لقد تجاوزت 4 تحذيرات، سيتم طردك الآن.`, 
+            null, 
+            { mentions: [who] }
+        );
+        await conn.groupParticipantsUpdate(m.chat, [who], 'remove'); // طرد المستخدم
+    }
+
+    return !1;
 };
 
-handler.command = ['advertir','advertencia','warn','warning'];
+handler.command = ['تحذير', 'warn', 'warning'];
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;
+
 export default handler;
