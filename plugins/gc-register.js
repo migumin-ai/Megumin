@@ -1,90 +1,120 @@
-import { createHash } from 'crypto';
 import fs from 'fs';
+import path from 'path';
+import axios from 'axios';
 
-let Reg = /\|?(.*)([.|] *?)([0-9]*) (.+)$/i;
+const dataFolder = './data'; // مسار حفظ البيانات
+if (!fs.existsSync(dataFolder)) fs.mkdirSync(dataFolder);
 
-let handler = async function (m, { conn, text, participants, isAdmin, isGroupAdmin }) {
-    let target = m.quoted ? m.quoted.sender : m.sender;  // إذا كان هناك رد على شخص، يتم تسجيله
-    let name2 = conn.getName(target);  // اسم الشخص المراد تسجيله (إما المرسل أو الشخص الذي تم الرد عليه)
+const getGroupDataFilePath = (groupId) => path.join(dataFolder, `${groupId}.json`);
 
-    // التحقق من أن المستخدم الذي يرسل الأمر هو أدمن
-    if (!isGroupAdmin && !isAdmin) throw `*『✦』فقط الأدمن يمكنه استخدام هذا الأمر.*`;
+const saveMember = (groupId, username, title) => {
+    const filePath = getGroupDataFilePath(groupId);
+    let members = [];
 
-    // التحقق من صحة النص المدخل
-    if (!Reg.test(text)) throw `*『✦』الرجاء استخدام الأمر بالشكل الصحيح:*\n\n#سجل *اسمك.عمرك اسم_المجموعة*\n\n\`\`\`مثال:\`\`\`\n#سجل *${name2}.18 teba*`;
-
-    let [_, name, splitter, age, groupName] = text.match(Reg);
-
-    // تحقق من المدخلات
-    if (!name) throw '*『✦』الاسم مطلوب للتسجيل.*';
-    if (!age) throw '*『✦』العمر مطلوب للتسجيل.*';
-    if (!groupName) throw '*『✦』اسم المجموعة مطلوب.*';
-    if (name.length >= 30) throw '*『✦』الاسم يجب ألا يتجاوز 30 حرفاً.*';
-
-    age = parseInt(age);
-    if (age > 999) throw '*『😏』هل أنت خالد؟*';
-    if (age < 5) throw '*『🍼』هل تحتاج إلى حضانة؟*';
-
-    // تحديد المسار بناءً على اسم المجموعة
-    let filePath = `./${groupName}.json`;
-
-    // إذا كان الملف لا يوجد، قم بإنشائه
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify([]));
+    // قراءة البيانات الحالية إذا كانت موجودة
+    if (fs.existsSync(filePath)) {
+        members = JSON.parse(fs.readFileSync(filePath));
     }
 
-    // قراءة البيانات الحالية من الملف
-    let users = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-    // التحقق إذا كان الشخص مسجلاً بالفعل باستخدام الـ ID
-    let userById = users.find(u => u.id === target);
-    if (userById) {
-        return conn.sendMessage(m.chat, { text: `*『✦』هذا الشخص مسجل بالفعل في هذه المجموعة.*` }, { quoted: m });
+    // تحقق مما إذا كان العضو مسجلاً بالفعل
+    const existingMember = members.find(member => member.username === username);
+    if (existingMember) {
+        return { success: false, message: `@${username} هو عضو مسجل بالفعل.` }; // العضو مسجل بالفعل
     }
 
-    // التحقق من اسم المستخدم المحجوز
-    let existingUser = users.find(u => u.name === name.trim());
-    if (existingUser) {
-        return conn.sendMessage(m.chat, { text: `*『✦』الاسم "${name.trim()}" محجوز بالفعل في هذه المجموعة.*` }, { quoted: m });
+    // تحقق مما إذا كان اللقب مسجلاً بالفعل
+    const titleHolder = members.find(member => member.title === title);
+    if (titleHolder) {
+        return { success: false, message: `اللقب "${title}" مسجل بالفعل من قبل @${titleHolder.username}.`, titleHolderUsername: titleHolder.username }; // اللقب مسجل بالفعل
     }
 
-    // إضافة المستخدم الجديد
-    users.push({
-        id: target,
-        name: name.trim(),
-        age: age,
-        groupName: groupName,
-        regTime: +new Date()
-    });
+    // إضافة العضو الجديد
+    members.push({ username, title });
 
-    // حفظ التحديثات إلى الملف
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-
-    // الرد بتأكيد التسجيل
-    let sn = createHash('md5').update(target).digest('hex').slice(0, 6);
-
-    let regbot = `👤 𝗥 𝗘 𝗚 𝗜 𝗦 𝗧 𝗥 𝗢 👤
-•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•
-「💭」𝗡𝗼𝗺𝗯𝗿𝗲: ${name}
-「✨️」𝗘𝗱𝗮𝗱: ${age} años
-「🏷️」𝗚𝗿𝘂𝗽𝗼: ${groupName}  // إضافة اسم المجموعة
-•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•
-「🎁」𝗥𝗲𝗰𝗼𝗺𝗽𝗲𝗻𝘀𝗮𝘀:
-• 15 Estrellas 🌟
-• 5 MiniCoins 🪙
-• 245 Experiencia 💸
-• 12 Tokens 💰
-•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•
-${packname}`;
-
-    await conn.sendMessage(m.chat, { text: regbot }, { quoted: m });
+    // حفظ البيانات مرة أخرى
+    fs.writeFileSync(filePath, JSON.stringify(members, null, 2));
+    return { success: true, message: `تم تسجيل العضو بنجاح.` }; // تم تسجيل العضو بنجاح
 };
 
-handler.help = ['سجل'];
-handler.tags = ['gc'];
-handler.command = ['سجل'];
-handler.admin = true;
-handler.botadmin = true;
+const getVideoList = async () => {
+    const response = await axios.get('https://gist.githubusercontent.com/migumin-ai/7e6f0db698b7a2e200a26e8b80da7b8a/raw/a9bffb24ca42a886512d34fa1c262f096622bb4c/alimaoie-megi%25F0%259F%258C%259F');
+    return response.data; // إرجاع قائمة الفيديوهات
+};
+
+const getMembersList = (groupId) => {
+    const filePath = getGroupDataFilePath(groupId);
+    if (fs.existsSync(filePath)) {
+        return JSON.parse(fs.readFileSync(filePath));
+    }
+    return [];
+};
+
+var handler = async (m, { conn, args }) => {
+    const groupId = m.chat; // معرف المجموعة
+    const groupMetadata = await conn.groupMetadata(m.chat); // استرداد معلومات المجموعة
+    const groupName = groupMetadata.subject; // اسم المجموعة
+    const senderId = m.sender.split('@')[0]; // معرف المرسل
+
+    // تحقق إذا كان المستخدم مشرفًا
+    const isAdmin = groupMetadata.participants.find(p => p.id === m.sender && (p.admin === 'admin' || p.admin === 'superadmin'));
+    if (!isAdmin) {
+        return conn.sendMessage(m.chat, { text: 'عذرًا، هذا الأمر مخصص للمشرفين فقط.' });
+    }
+
+    // تحقق إذا كان الأمر يطلب عرض الأعضاء المسجلين
+    if (args[0] === 'مسجلين') {
+        let members = getMembersList(groupId);
+        if (members.length === 0) {
+            return conn.sendMessage(m.chat, { text: 'لا يوجد أعضاء مسجلين في هذه المجموعة.' });
+        }
+        let memberList = members.map(member => `@${member.username} (${member.title})`).join('\n');
+        return conn.sendMessage(m.chat, { text: `أعضاء المجموعة:\n${memberList}`, mentions: members.map(member => `${member.username}@s.whatsapp.net`) });
+    }
+
+    // التأكد من وجود التاغ
+    if (!m.mentionedJid.length) {
+        return conn.sendMessage(m.chat, { text: 'يرجى استخدام التاغ لتسجيل الأعضاء، مثل: .سجل @username اللقب' });
+    }
+
+    // استرداد العضو ولقبه
+    const username = m.mentionedJid[0].split('@')[0]; // استخدام الجزء قبل @
+    const title = args[1] || 'بدون لقب'; // إذا لم يتم إدخال لقب، نستخدم "بدون لقب"
+
+    // حفظ العضو
+    const { success, message, titleHolderUsername } = saveMember(groupId, username, title);
+    if (success) {
+        // اختيار فيديو عشوائي
+        const videoList = await getVideoList(); // استرداد قائمة الفيديوهات
+        const randomVideo = videoList[Math.floor(Math.random() * videoList.length)].vid; // اختيار فيديو عشوائي
+
+        // إعداد الرسالة مع تفاصيل التسجيل
+        const messageWithDetails = `👤 *ʀᴇɢɪꜱᴛᴇʀ-الـسِـجِـلّ *👤
+•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•
+「💭」🅃الـلـقـب-title: ${title}
+「✨️」*tag-الـمـنـشـن*: @${username}
+「🏷️」*group-الـمـجـمـوعـه*: ${groupName}
+•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•
+「📬」* ፝͜⁞M͢ᴇɢ፝֟ᴜᴍ⃨ɪɴ⃜✰⃔-مــغــومــيــن:*
+اتـمـنـى ان تـحـظـى بـوقـت مـمـتـع فـي نـقـابـتـنا 
+ارجـو منك ان تـكون عـضـوا مـتـفاعـلا 
+وان تـحـتـرم افـراد الـجـروب
+•┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•`;
+
+        // إرسال الرسالة مع الفيديو
+        await conn.sendMessage(m.chat, {
+            video: { url: randomVideo },
+            caption: messageWithDetails,
+            mentions: [m.mentionedJid[0]],
+        });
+    } else {
+        conn.sendMessage(m.chat, { text: message, mentions: [titleHolderUsername + '@s.whatsapp.net'] }); // إضافة معرف الشخص الذي يملك اللقب
+    }
+}
+
+handler.help = ['سجل @username اللقب', 'سجل مسجلين'];
+handler.register = false;
 handler.group = true;
+handler.tags = ['info'];
+handler.command = ['سجل']; // الأمر الجديد
 
 export default handler;
