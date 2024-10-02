@@ -53,13 +53,14 @@ const getMembersList = (groupId) => {
     return [];
 };
 
-var handler = async (m, { conn, args }) => {
+var handler = async (m, { conn, args, isGroupMsg }) => {
+    if (!isGroupMsg) return; // التأكد من أن الأمر يتم تنفيذه في مجموعة
+
     const groupId = m.chat; // معرف المجموعة
     const groupMetadata = await conn.groupMetadata(m.chat); // استرداد معلومات المجموعة
     const groupName = groupMetadata.subject; // اسم المجموعة
-    const senderId = m.sender.split('@')[0]; // معرف المرسل
 
-    // تحقق إذا كان المستخدم مشرفًا
+    // التحقق من المشرف
     const isAdmin = groupMetadata.participants.find(p => p.id === m.sender && (p.admin === 'admin' || p.admin === 'superadmin'));
     if (!isAdmin) {
         return conn.sendMessage(m.chat, { text: 'عذرًا، هذا الأمر مخصص للمشرفين فقط.' });
@@ -84,8 +85,15 @@ var handler = async (m, { conn, args }) => {
     const username = m.mentionedJid[0].split('@')[0]; // استخدام الجزء قبل @
     const title = args[1] || 'بدون لقب'; // إذا لم يتم إدخال لقب، نستخدم "بدون لقب"
 
+    // منع التكرار باستخدام معرف الرسالة لمنع استدعاء الكود مرتين
+    const uniqueId = m.key.id; 
+    if (handler.executedCommands && handler.executedCommands[uniqueId]) return; // إذا تم تنفيذ نفس معرف الرسالة سابقًا
+    handler.executedCommands = handler.executedCommands || {};
+    handler.executedCommands[uniqueId] = true;
+
     // حفظ العضو
     const { success, message, existingMemberUsername, titleHolderUsername } = saveMember(groupId, username, title);
+
     if (success) {
         // اختيار فيديو عشوائي
         const videoList = await getVideoList(); // استرداد قائمة الفيديوهات
@@ -105,7 +113,7 @@ var handler = async (m, { conn, args }) => {
 •┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄•`;
 
         // إرسال الرسالة مع الفيديو
-        await conn.sendMessage(m.chat, {
+        return await conn.sendMessage(m.chat, {
             video: { url: randomVideo },
             caption: messageWithDetails,
             mentions: [m.mentionedJid[0]],
@@ -118,9 +126,9 @@ var handler = async (m, { conn, args }) => {
         if (titleHolderUsername) {
             mentionList.push(titleHolderUsername + '@s.whatsapp.net');
         }
-        conn.sendMessage(m.chat, { text: message, mentions: mentionList });
+        return conn.sendMessage(m.chat, { text: message, mentions: mentionList });
     }
-}
+};
 
 handler.help = ['سجل @username اللقب', 'سجل مسجلين'];
 handler.register = false;
