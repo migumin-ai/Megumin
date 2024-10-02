@@ -1,48 +1,66 @@
 import fs from 'fs';
+import path from 'path';
 
-// تأكد من تحديد معرف المالك بشكل صحيح
-const OWNER_ID = '212760517793@s.whatsapp.net'; // استبدلها بمعرف المالك الصحيح
+const dataFolder = './data'; // مسار حفظ البيانات
+if (!fs.existsSync(dataFolder)) fs.mkdirSync(dataFolder);
 
-// Handler لحذف مستخدم من ملف JSON
-let deleteUserHandler = async (m, { conn, text }) => {
-    // تحقق من وجود اسم المجموعة
-    if (!text) throw '*『✦』يرجى إدخال اسم المجموعة لحذف المستخدم.* مثال: .حذف teba';
+const getGroupDataFilePath = (groupId) => path.join(dataFolder, `${groupId}.json`);
 
-    let groupName = text.trim();
-    let filePath = `./${groupName}.json`;
-
-    // تحقق من وجود ملف المجموعة
-    if (!fs.existsSync(filePath)) throw `*『✦』الملف الخاص بالمجموعة "${groupName}" غير موجود.*`;
-
-    // قراءة البيانات من الملف
-    let users = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-    // تحقق من أن المستخدم هو المالك
-    if (m.sender !== OWNER_ID) {
-        return conn.sendMessage(m.chat, { text: '*『✦』هذا الأمر مخصص للمالك فقط.*' }, { quoted: m });
+// دالة لحذف العضو من ملف JSON الخاص بالمجموعة
+const deleteMember = (groupId, username) => {
+    const filePath = getGroupDataFilePath(groupId);
+    if (!fs.existsSync(filePath)) {
+        return { success: false, message: 'لا يوجد أعضاء مسجلين في هذه المجموعة.' };
     }
 
-    // تحقق من وجود رد على رسالة شخص أو استخدم المرسل
-    let userIdToDelete = m.quoted ? m.quoted.sender : m.sender;
+    let members = JSON.parse(fs.readFileSync(filePath));
 
-    // البحث عن المستخدم في الملف
-    let userIndex = users.findIndex(u => u.id === userIdToDelete);
-    if (userIndex === -1) {
-        return conn.sendMessage(m.chat, { text: `*『✦』لم يتم العثور على المستخدم في هذه المجموعة.*` }, { quoted: m });
+    const memberIndex = members.findIndex(member => member.username === username);
+    if (memberIndex === -1) {
+        return { success: false, message: `@${username} غير موجود في قائمة المسجلين.` };
     }
 
-    // حذف المستخدم
-    users.splice(userIndex, 1);
+    // حذف العضو
+    const removedMember = members.splice(memberIndex, 1);
 
-    // حفظ التحديثات إلى الملف
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+    // تحديث ملف JSON بعد حذف العضو
+    fs.writeFileSync(filePath, JSON.stringify(members, null, 2));
 
-    // الرد بتأكيد الحذف
-    return conn.sendMessage(m.chat, { text: `*『✦』تم حذف المستخدم بنجاح من المجموعة.*` }, { quoted: m });
+    return { success: true, message: `تم حذف @${username} من القائمة.`, removedMember };
 };
 
-deleteUserHandler.help = ['حذف'];
-deleteUserHandler.tags = ['gc'];
-deleteUserHandler.command = ['حذف'];
+var handler = async (m, { conn, args, isAdmin, isGroupAdmin }) => {
+    const groupId = m.chat; // معرف المجموعة
 
-export default deleteUserHandler;
+    // التحقق مما إذا كان المستخدم مشرفًا
+    const groupMetadata = await conn.groupMetadata(m.chat);
+    const senderIsAdmin = groupMetadata.participants.find(participant => participant.id === m.sender && participant.admin);
+    
+    if (!senderIsAdmin) {
+        return conn.sendMessage(m.chat, { text: 'هذا الأمر مخصص للمشرفين فقط.' });
+    }
+
+    // التأكد من أن المستخدم ذكر شخصًا باستخدام التاغ
+    if (!m.mentionedJid.length) {
+        return conn.sendMessage(m.chat, { text: 'يرجى استخدام التاغ لحذف العضو، مثل: .dt @username' });
+    }
+
+    const username = m.mentionedJid[0].split('@')[0]; // استرداد اسم المستخدم
+
+    // حذف العضو من الملف
+    const { success, message, removedMember } = deleteMember(groupId, username);
+    
+    if (success) {
+        return conn.sendMessage(m.chat, { text: message, mentions: [m.mentionedJid[0]] });
+    } else {
+        return conn.sendMessage(m.chat, { text: message });
+    }
+};
+
+handler.help = ['dt @username'];
+handler.register = false;
+handler.group = true;
+handler.tags = ['info'];
+handler.command = ['dt']; // الأمر الجديد
+
+export default handler;
