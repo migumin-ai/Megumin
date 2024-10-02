@@ -19,7 +19,11 @@ const saveMember = (groupId, username, title) => {
     // تحقق مما إذا كان العضو مسجلاً بالفعل
     const existingMember = members.find(member => member.username === username);
     if (existingMember) {
-        return { success: false, message: `@${username} هو عضو مسجل بالفعل.` }; // العضو مسجل بالفعل
+        return { 
+            success: false, 
+            message: `@${username} هو عضو مسجل بالفعل باللقب "${existingMember.title}".`, // استخدام tag وإظهار اللقب
+            existingMemberUsername: username
+        };
     }
 
     // تحقق مما إذا كان اللقب مسجلاً بالفعل
@@ -81,7 +85,7 @@ var handler = async (m, { conn, args }) => {
     const title = args[1] || 'بدون لقب'; // إذا لم يتم إدخال لقب، نستخدم "بدون لقب"
 
     // حفظ العضو
-    const { success, message, titleHolderUsername } = saveMember(groupId, username, title);
+    const { success, message, existingMemberUsername, titleHolderUsername } = saveMember(groupId, username, title);
     if (success) {
         // اختيار فيديو عشوائي
         const videoList = await getVideoList(); // استرداد قائمة الفيديوهات
@@ -107,7 +111,14 @@ var handler = async (m, { conn, args }) => {
             mentions: [m.mentionedJid[0]],
         });
     } else {
-        conn.sendMessage(m.chat, { text: message, mentions: [titleHolderUsername + '@s.whatsapp.net'] }); // إضافة معرف الشخص الذي يملك اللقب
+        const mentionList = [];
+        if (existingMemberUsername) {
+            mentionList.push(existingMemberUsername + '@s.whatsapp.net');
+        }
+        if (titleHolderUsername) {
+            mentionList.push(titleHolderUsername + '@s.whatsapp.net');
+        }
+        conn.sendMessage(m.chat, { text: message, mentions: mentionList });
     }
 }
 
