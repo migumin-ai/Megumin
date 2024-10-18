@@ -47,7 +47,7 @@ m = smsg(this, m) || m
 if (!m)
 return
 m.exp = 0
-m.estrellas = false
+m.cookies = false
 m.money = false
 try {
 // TODO: use loop to insert data instead of this
@@ -65,7 +65,7 @@ if (!('premium' in user)) user.premium = false
 if (!('muto' in user)) user.muto = false
 if (!isNumber(user.joincount)) user.joincount = 1
 if (!isNumber(user.money)) user.money = 150
-if (!isNumber(user.estrellas)) user.estrellas = 20
+if (!isNumber(user.cookies)) user.cookies = 20
 if (!('registered' in user)) user.registered = false
 
 if (!user.registered) {
@@ -117,7 +117,7 @@ lastduel: 0,
 lastpago: 0,
 lastrob: 0,
 level: 0,
-estrellas: 20,
+cookies: 20,
 money: 100,
 muto: false,
 premium: false,
@@ -167,7 +167,9 @@ if (!('sCondition' in chat)) chat.sCondition = JSON.stringify([{ grupo: { usuari
 if (!('delete' in chat)) chat.delete = false                   
 if (!('modohorny' in chat)) chat.modohorny = false                   
 if (!('autosticker' in chat)) chat.autosticker = false      
-if (!('audios' in chat)) chat.audios = false               
+if (!('audios' in chat)) chat.audios = false
+if (!('antiBot' in chat)) chat.antiBot = false 
+if (!('antiBot2' in chat)) chat.antiBot2 = false               
 if (!('antiver' in chat)) chat.antiver = false 
 if (!('antiPorn' in chat)) chat.antiPorn = false     
 if (!('antiLink' in chat)) chat.antiLink = false     
@@ -204,6 +206,8 @@ delete: false,
 modohorny: false,
 autosticker: false,
 audios: false,
+antiBot: false,
+antiBot2: false,
 antiver: false,
 antiPorn: false,
 antiLink: false,
@@ -452,7 +456,7 @@ continue
 m.isCommand = true
 let xp = 'exp' in plugin ? parseInt(plugin.exp) : 10
 if (xp > 2000)
-m.reply('Exp limit') 
+m.reply('Chirrido -_-') 
 else               
 if (!isPrems && plugin.money && global.db.data.users[m.sender].money < plugin.money * 1) {
 conn.reply(m.chat, `❮💰❯ 𝗡𝗼 𝘁𝗶𝗲𝗻𝗲𝘀 𝘀𝘂𝗳𝗶𝗰𝗶𝗲𝗻𝘁𝗲𝘀 𝗠𝗲𝗴𝘂𝗖𝗼𝗶𝗻𝘀 𝗽𝗮𝗿𝗮 𝘂𝘀𝗮𝗿 𝗲𝘀𝘁𝗲 𝗰𝗼𝗺𝗮𝗻𝗱𝗼.`, m, rcanal)       
@@ -460,8 +464,8 @@ continue
 }
 
 m.exp += xp
-if (!isPrems && plugin.estrellas && global.db.data.users[m.sender].estrellas < plugin.estrellas * 1) {
-conn.reply(m.chat, `❮🌟❯ 𝗡𝗼 𝘁𝗶𝗲𝗻𝗲𝘀 𝘀𝘂𝗳𝗶𝗰𝗶𝗲𝗻𝘁𝗲𝘀 𝗘𝘀𝘁𝗿𝗲𝗹𝗹𝗮𝘀 𝗽𝗮𝗿𝗮 𝘂𝘀𝗮𝗿 𝗲𝘀𝘁𝗲 𝗰𝗼𝗺𝗮𝗻𝗱𝗼. 𝗣𝗮𝗿𝗮 𝗰𝗼𝗺𝗽𝗿𝗮𝗿 𝗺𝗮𝘀 𝗘𝘀𝘁𝗿𝗲𝗹𝗹𝗮𝘀, 𝘂𝘀𝗲 𝗲𝘀𝘁𝗲 𝗰𝗼𝗺𝗮𝗻𝗱𝗼.\n\n• 𝗣𝗼𝗿 𝗘𝗷𝗲𝗺𝗽𝗹𝗼:\n\n*${usedPrefix}buyall*\n*${usedPrefix}buy*`, m, rcanal) 
+if (!isPrems && plugin.cookies && global.db.data.users[m.sender].cookies < plugin.cookies * 1) {
+conn.reply(m.chat, `❮🌟❯ 𝗡𝗼 𝘁𝗶𝗲𝗻𝗲𝘀 𝘀𝘂𝗳𝗶𝗰𝗶𝗲𝗻𝘁𝗲𝘀 𝗖𝗼𝗼𝗸𝗶𝗲𝘀 𝗽𝗮𝗿𝗮 𝘂𝘀𝗮𝗿 𝗲𝘀𝘁𝗲 𝗰𝗼𝗺𝗮𝗻𝗱𝗼. 𝗣𝗮𝗿𝗮 𝗰𝗼𝗺𝗽𝗿𝗮𝗿 𝗺𝗮𝘀 𝗖𝗼𝗼𝗸𝗶𝗲𝘀, 𝘂𝘀𝗲 𝗲𝘀𝘁𝗲 𝗰𝗼𝗺𝗮𝗻𝗱𝗼.\n\n• 𝗣𝗼𝗿 𝗘𝗷𝗲𝗺𝗽𝗹𝗼:\n\n*${usedPrefix}buyall*\n*${usedPrefix}buy*`, m, rcanal) 
 continue
 }
 
@@ -496,7 +500,7 @@ __filename
 try {
 await plugin.call(this, m, extra)
 if (!isPrems)
-m.estrellas = m.estrellas || plugin.estrellas || false
+m.cookies = m.cookies || plugin.cookies || false
 m.money = m.money || plugin.money || false
 } catch (e) {
 // Error occured
@@ -521,8 +525,8 @@ await plugin.after.call(this, m, extra)
 } catch (e) {
 console.error(e)
 }}
-if (m.estrellas)
-conn.reply(m.chat, `Utilizaste *${+m.estrellas}* 🌟`, m, fake)
+if (m.cookies)
+conn.reply(m.chat, `Utilizaste *${+m.cookies}* 🍪`, m, fake)
 }
 if (m.money)
 conn.reply(m.chat, `Utilizaste *${+m.money}* 💰`, m, fake)
@@ -545,7 +549,7 @@ await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id:
 }
 if (m.sender && (user = global.db.data.users[m.sender])) {
 user.exp += m.exp
-user.estrellas -= m.estrellas * 1
+user.cookies -= m.cookies * 1
 user.money -= m.money * 1
 }
 
@@ -707,7 +711,7 @@ if (!isAnticall) return
 for (let nk of callUpdate) { 
 if (nk.isGroup == false) {
 if (nk.status == "offer") {
-let callmsg = await this.reply(nk.from, `❮📣❯ 𝗛𝗼𝗹𝗮 *@${nk.from.split('@')[0]}*, 𝙡𝙖𝙨 ${nk.isVideo ? '𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀' : '𝘃𝗶𝗱𝗲𝗼 𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀'} 𝗻𝗼 𝗲𝘀𝘁𝗮𝗻 𝗽𝗲𝗿𝗺𝗶𝘁𝗶𝗱𝗮𝘀 ??𝗻 𝗲𝘀𝘁𝗲 𝗯𝗼𝘁.\n\n• 𝗘𝗻 𝗰𝗮𝘀𝗼 𝗱𝗲 𝘂𝗻 𝗲𝗿𝗿𝗼𝗿, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁𝗮 𝗮𝗹 𝗽𝗿𝗼𝗽𝗶𝗲𝘁𝗮𝗿𝗶𝗼:\n• ${creador}`, false, { mentions: [nk.from] })
+let callmsg = await this.reply(nk.from, `❮📣❯ 𝗛𝗼𝗹𝗮 *@${nk.from.split('@')[0]}*, 𝙡𝙖𝙨 ${nk.isVideo ? '𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀' : '𝘃𝗶𝗱𝗲𝗼 𝗹𝗹𝗮𝗺𝗮𝗱𝗮𝘀'} 𝗻𝗼 𝗲𝘀𝘁𝗮𝗻 𝗽𝗲𝗿𝗺𝗶𝘁𝗶𝗱𝗮𝘀 𝗲𝗻 𝗲𝘀𝘁𝗲 𝗯𝗼𝘁.\n\n• 𝗘𝗻 𝗰𝗮𝘀𝗼 𝗱𝗲 𝘂𝗻 𝗲𝗿𝗿𝗼𝗿, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁𝗮 𝗮𝗹 𝗽𝗿𝗼𝗽𝗶𝗲𝘁𝗮𝗿𝗶𝗼:\n• ${creador}`, false, { mentions: [nk.from] })
 //let data = global.owner.filter(([id, isCreator]) => id && isCreator)
 //await this.sendContact(nk.from, data.map(([id, name]) => [id, name]), false, { quoted: callmsg })
 await this.updateBlockStatus(nk.from, 'block')
@@ -745,7 +749,7 @@ group: '「🐢」 *لا يمكن تنفيذ هذه الوظيفة funcion إل�
 private: '「🍭」 *لا يمكن استخدام هذه الوظيفة función إلا في الدردشة الخاصة.*', 
 admin: '「👑」 *لا يمكن استخدام هذا الأمر إلا من قبل المسؤولين.*', 
 botAdmin: '「🚩」 *لاستخدام هذه الميزة función يجب أن أكون مشرفتا.*', 
-unreg: '「🍟」 *¡Hey! نت غير مسجل، قم بالتسجيل لاستخدام هذه الوظيفه función*\n\n*/reg الاسم.العمر*\n\n*_❕ مثلا_* : */reg light.24*',
+unreg: '「🍟」 *¡Hey! انت غير مسجل، قم بالتسجيل باستخدام الامر  función*\n\n*تسجيل*\n\n*_❕ مثلا_* : *.تسجيل*',
 restrict: '「💫」 *تم تعطيل هذه الميزة.*'
 }[type];
 if (msg) return conn.reply(m.chat, msg, m, rcanal).then(_ => m.react('✖️'))}
